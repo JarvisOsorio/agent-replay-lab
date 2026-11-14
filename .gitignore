@@ -1,0 +1,12 @@
+node_modules
+dist
+coverage
+*.sqlite
+*.sqlite-journal
+.agent-replay
+.DS_Store
+*.log
+.turbo
+.env
+.env.*
+!.env.example

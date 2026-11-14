@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "cursor/**"]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    name: fmt · typecheck · test (offline)
+    runs-on: ubuntu-latest
+    # Prefer hermetic runs: no secrets needed; mock replay must not hit the network.
+    env:
+      NODE_NO_WARNINGS: "1"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        # version comes from package.json packageManager field
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Format check
+        run: pnpm fmt:check
+
+      - name: Build
+        run: pnpm build
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit + integration tests
+        run: pnpm test
+        # Offline guarantee: OfflineMockReplay uses local cassettes only (no HTTP client).
+
+      - name: Example record → replay → regress (offline)
+        run: pnpm --filter @agent-replay-lab/example-basic-agent demo
+
+      - name: Document offline guarantee
+        run: |
+          echo "Replay tests use OfflineMockReplay over local cassettes only."
+          echo "No HTTP client is invoked by core replay/diff/fixture paths."
+          echo "If your runner supports network-denied steps, wrap 'pnpm test' accordingly."
