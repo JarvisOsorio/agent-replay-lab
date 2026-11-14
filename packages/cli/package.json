@@ -1,0 +1,31 @@
+{
+  "name": "@agent-replay-lab/cli",
+  "version": "0.1.0",
+  "description": "CLI for Agent Replay Lab — record, replay, diff, test",
+  "license": "Apache-2.0",
+  "type": "module",
+  "bin": {
+    "agent-replay": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --config vitest.config.ts"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@agent-replay-lab/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.1",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.2"
+  }
+}

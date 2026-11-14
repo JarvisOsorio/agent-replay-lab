@@ -1,0 +1,29 @@
+{
+  "name": "agent-replay-lab",
+  "private": true,
+  "version": "0.1.0",
+  "description": "VCR for tool-using TypeScript agents — record, replay, diff, and CI-test executions",
+  "license": "Apache-2.0",
+  "packageManager": "pnpm@10.33.4",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "pnpm -r --filter=./packages/* run build",
+    "typecheck": "pnpm -r --filter=./packages/* run typecheck",
+    "test": "pnpm --filter @agent-replay-lab/core test && pnpm --filter @agent-replay-lab/cli test",
+    "fmt": "prettier --write .",
+    "fmt:check": "prettier --check .",
+    "check": "pnpm fmt:check && pnpm typecheck && pnpm test"
+  },
+  "devDependencies": {
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.2"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}
