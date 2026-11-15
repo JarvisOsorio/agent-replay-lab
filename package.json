@@ -14,7 +14,7 @@
     "test": "pnpm --filter @agent-replay-lab/core test && pnpm --filter @agent-replay-lab/cli test",
     "fmt": "prettier --write .",
     "fmt:check": "prettier --check .",
-    "check": "pnpm fmt:check && pnpm typecheck && pnpm test"
+    "check": "pnpm fmt:check && pnpm build && pnpm typecheck && pnpm test"
   },
   "devDependencies": {
     "prettier": "^3.5.3",

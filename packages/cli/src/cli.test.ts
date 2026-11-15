@@ -91,6 +91,9 @@ describe("CLI helpers", () => {
     expect(existsSync(cassette)).toBe(true);
     expect(readExport(cassette).fixtures?.[0]?.name).toBe("golden");
 
+    // Missing fixture name → exit 2 (invalid fixture), not infra 3
+    expect(runFixtureAssertions(undefined, events).exitCode).toBe(ExitCode.INVALID_FIXTURE);
+
     store.close();
   });
 });

@@ -67,10 +67,11 @@ pnpm --filter @agent-replay-lab/cli exec agent-replay replay <runId>      # offl
 pnpm --filter @agent-replay-lab/cli exec agent-replay diff <runA> <runB>
 pnpm --filter @agent-replay-lab/cli exec agent-replay test golden --json
 pnpm --filter @agent-replay-lab/cli exec agent-replay export ./trace.json
+pnpm --filter @agent-replay-lab/cli exec agent-replay import ./trace.json
 pnpm --filter @agent-replay-lab/cli exec agent-replay doctor
 ```
 
-Human and `--json` output. Offline by default.
+Human and `--json` output. Offline by default. `import` remaps the cassette into the **local** project id so `list` / `replay` / `test` work immediately (integrity hash still verified against the file).
 
 ### CI exit codes (`test`)
 
