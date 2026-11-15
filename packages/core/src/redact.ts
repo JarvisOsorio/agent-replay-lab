@@ -1,6 +1,7 @@
 /**
- * Privacy-first redaction applied BEFORE persist.
- * Traces are untrusted input after load — never execute payload content.
+ * Best-effort privacy redaction applied BEFORE persist (known keys + common
+ * token shapes). Not foolproof; not a PII/governance product. Extend via
+ * RedactOptions. Traces after load are untrusted — never execute payloads.
  */
 
 const REDACTED = "[REDACTED]";
