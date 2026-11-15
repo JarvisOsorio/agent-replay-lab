@@ -118,13 +118,13 @@ Replay tests use in-memory / local cassette data and make **no network calls**. 
 
 ## vs siblings & peers
 
-| Tool | Job | Boundary |
-| ---- | --- | -------- |
-| **Agent Replay Lab** | App-level **tool** cassette + CI structural gates (TS / SQLite) | This repo — tools only in v0.1 |
-| **mcp-pordego** (sibling) | MCP _gateway_ protocol replay | Protocol proxy — do not dual-build here |
-| **agentscrub** (sibling) | Remediate secrets in _existing_ agent stores | We redact on write (best-effort); they scrub after |
-| Langfuse / LangSmith / Phoenix | Trace + live dataset re-run | Observe / score — not hermetic tool stubs |
-| Cassette, Agentic Stash, Agent VCR, StoneTape, TracePact, agent-retrace, AgentTape | Peer cassette / trajectory tools | Overlap on record/replay/CI; we stay local SQLite + explicit mock≠model |
+| Tool                                                                               | Job                                                             | Boundary                                                                |
+| ---------------------------------------------------------------------------------- | --------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| **Agent Replay Lab**                                                               | App-level **tool** cassette + CI structural gates (TS / SQLite) | This repo — tools only in v0.1                                          |
+| **mcp-pordego** (sibling)                                                          | MCP _gateway_ protocol replay                                   | Protocol proxy — do not dual-build here                                 |
+| **agentscrub** (sibling)                                                           | Remediate secrets in _existing_ agent stores                    | We redact on write (best-effort); they scrub after                      |
+| Langfuse / LangSmith / Phoenix                                                     | Trace + live dataset re-run                                     | Observe / score — not hermetic tool stubs                               |
+| Cassette, Agentic Stash, Agent VCR, StoneTape, TracePact, agent-retrace, AgentTape | Peer cassette / trajectory tools                                | Overlap on record/replay/CI; we stay local SQLite + explicit mock≠model |
 
 ## Normalization (strict matching)
 
