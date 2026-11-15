@@ -28,7 +28,11 @@ Mock replay is **not** deterministic LLM verification. We never claim “full ag
 
 ## Quick start
 
+**v0.1 install path:** clone this repo (packages are **not** on npm yet). Node `>=22` + `pnpm` (see `packageManager` in root `package.json`).
+
 ```bash
+git clone https://github.com/JarvisOsorio/agent-replay-lab.git
+cd agent-replay-lab
 pnpm install
 pnpm build
 pnpm test
@@ -36,6 +40,8 @@ pnpm test
 # 5-minute proof
 pnpm --filter @agent-replay-lab/example-basic-agent demo
 ```
+
+Optional (advanced): after `pnpm build`, `pnpm pack` in `packages/core` (and rewrite CLI’s `workspace:*` dep to the core tarball before packing CLI) then `file:`-install into another project. Prefer the monorepo clone until packages are published.
 
 ### Capture seam (`wrapTool`)
 
@@ -65,13 +71,17 @@ pnpm --filter @agent-replay-lab/cli exec agent-replay list
 pnpm --filter @agent-replay-lab/cli exec agent-replay inspect <runId>
 pnpm --filter @agent-replay-lab/cli exec agent-replay replay <runId>      # offline mock
 pnpm --filter @agent-replay-lab/cli exec agent-replay diff <runA> <runB>
+pnpm --filter @agent-replay-lab/cli exec agent-replay fixture create <runId> golden
 pnpm --filter @agent-replay-lab/cli exec agent-replay test golden --json
+pnpm --filter @agent-replay-lab/cli exec agent-replay test golden --run <candidateRunId>
 pnpm --filter @agent-replay-lab/cli exec agent-replay export ./trace.json
 pnpm --filter @agent-replay-lab/cli exec agent-replay import ./trace.json
 pnpm --filter @agent-replay-lab/cli exec agent-replay doctor
 ```
 
 Human and `--json` output. Offline by default. `import` remaps the cassette into the **local** project id so `list` / `replay` / `test` work immediately (integrity hash still verified against the file).
+
+`fixture create` pins tool **sequence, args, and responses**. `test golden --run <otherRun>` fails (exit 1) on structural drift — same bar as `diff`.
 
 ### CI exit codes (`test`)
 

@@ -115,6 +115,13 @@ describe("record → replay → diff → test (integration)", () => {
 
     const pass = runFixtureAssertions(fixture, events);
     expect(pass.exitCode).toBe(ExitCode.PASS);
+    expect(assertions.some((a) => a.type === "tool.argsMatch")).toBe(true);
+    expect(assertions.some((a) => a.type === "tool.responseMatch")).toBe(true);
+
+    // Default fixture must fail on arg/response drift (stranger CI gate).
+    const driftedFail = runFixtureAssertions(fixture, drifted);
+    expect(driftedFail.exitCode).toBe(ExitCode.ASSERTION_FAIL);
+    expect(driftedFail.errors.some((e) => /Args mismatch|Response mismatch/i.test(e))).toBe(true);
 
     const failAssert = runFixtureAssertions(
       {

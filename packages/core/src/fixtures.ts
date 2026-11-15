@@ -212,6 +212,7 @@ export function runFixtureAssertions(
 
 export function defaultAssertionsFromEvents(events: ReplayEvent[]): AssertionSpec[] {
   const called = toolCalled(events);
+  const completed = toolCompleted(events);
   const names = called.map((e) => String(e.payload.toolName ?? ""));
   const unique = [...new Set(names)];
   const assertions: AssertionSpec[] = [
@@ -222,6 +223,30 @@ export function defaultAssertionsFromEvents(events: ReplayEvent[]): AssertionSpe
   for (const name of unique) {
     const count = names.filter((n) => n === name).length;
     assertions.push({ type: "tool.called", toolName: name, count });
+  }
+  // Pin args + responses so `fixture create` + `test --run <candidate>` catches
+  // structural drift (e.g. city/Berlin→Munich), not only tool name/count.
+  const occurrenceByName = new Map<string, number>();
+  for (const ev of called) {
+    const toolName = String(ev.payload.toolName ?? "");
+    if (!toolName) continue;
+    const occurrence = (occurrenceByName.get(toolName) ?? 0) + 1;
+    occurrenceByName.set(toolName, occurrence);
+    const args = (ev.payload.args ?? {}) as Record<string, unknown>;
+    assertions.push({ type: "tool.argsMatch", toolName, args, occurrence });
+  }
+  const responseOccurrence = new Map<string, number>();
+  for (const ev of completed) {
+    const toolName = String(ev.payload.toolName ?? "");
+    if (!toolName) continue;
+    const occurrence = (responseOccurrence.get(toolName) ?? 0) + 1;
+    responseOccurrence.set(toolName, occurrence);
+    assertions.push({
+      type: "tool.responseMatch",
+      toolName,
+      result: ev.payload.result,
+      occurrence,
+    });
   }
   return assertions;
 }
