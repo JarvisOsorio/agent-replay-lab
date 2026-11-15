@@ -145,8 +145,24 @@ describe("record → replay → diff → test (integration)", () => {
     expect(imported.runsImported).toBe(1);
     expect(store2.getEvents(replay.runId).length).toBe(events.length);
 
+    // Remap into a different local project id (CLI stranger path after import).
+    const store3 = new ReplayStore(join(dir, "remap.sqlite"));
+    const remapped = importProject(store3, reloaded, { targetProjectId: "local-project" });
+    expect(remapped.ok).toBe(true);
+    expect(store3.listRuns("local-project")).toHaveLength(1);
+    expect(store3.listRuns("demo")).toHaveLength(0);
+    expect(store3.getFixture("local-project", "golden")?.name).toBe("golden");
+
+    // Tamper detection
+    const tampered = structuredClone(reloaded);
+    tampered.runs[0]!.run.label = "TAMPERED";
+    const refused = importProject(new ReplayStore(join(dir, "tamper.sqlite")), tampered);
+    expect(refused.ok).toBe(false);
+    expect(refused.errors.some((e) => e.includes("Integrity"))).toBe(true);
+
     store.close();
     store2.close();
+    store3.close();
   });
 
   it("documents offline guarantee: mock replay never touches network", async () => {

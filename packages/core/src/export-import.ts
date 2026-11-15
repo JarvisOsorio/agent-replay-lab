@@ -68,7 +68,14 @@ export interface ImportResult {
 export function importProject(
   store: ReplayStore,
   data: TraceExport,
-  opts?: { skipIntegrity?: boolean },
+  opts?: {
+    skipIntegrity?: boolean;
+    /**
+     * Remap imported runs/fixtures into this project id (default: export's projectId).
+     * CLI passes the local config project so `list` / `test` work after import.
+     */
+    targetProjectId?: string;
+  },
 ): ImportResult {
   const errors: string[] = [];
 
@@ -93,7 +100,8 @@ export function importProject(
     return { ok: false, runsImported: 0, fixturesImported: 0, errors };
   }
 
-  store.ensureProject(data.projectId, data.projectId);
+  const projectId = opts?.targetProjectId ?? data.projectId;
+  store.ensureProject(projectId, projectId);
 
   let runsImported = 0;
   for (const entry of data.runs ?? []) {
@@ -102,7 +110,8 @@ export function importProject(
       errors.push(`Skip existing run ${entry.run.runId}`);
       continue;
     }
-    store.insertRun(entry.run);
+    const run = { ...entry.run, projectId };
+    store.insertRun(run);
     for (const ev of entry.events) {
       store.insertEvent(ev);
     }
@@ -111,7 +120,7 @@ export function importProject(
 
   let fixturesImported = 0;
   for (const fx of data.fixtures ?? []) {
-    store.saveFixture(fx);
+    store.saveFixture({ ...fx, projectId });
     fixturesImported++;
   }
 

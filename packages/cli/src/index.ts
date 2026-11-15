@@ -253,15 +253,20 @@ async function cmdTest(argv: string[], cwd: string): Promise<number> {
       const { store, projectId } = openStore(cwd, argv);
       try {
         fixture = store.getFixture(projectId, fixtureName);
-        const runId = getFlag(argv, "run") ?? fixture?.sourceRunId;
-        if (!runId) {
-          emit(format, "No run specified and fixture missing sourceRunId", {
-            ok: false,
-            error: "missing_run",
-          });
-          return ExitCode.INFRA_ERROR;
+        // Missing fixture → exit 2 via runFixtureAssertions (do not short-circuit as infra).
+        if (!fixture) {
+          events = undefined;
+        } else {
+          const runId = getFlag(argv, "run") ?? fixture.sourceRunId;
+          if (!runId) {
+            emit(format, "No run specified and fixture missing sourceRunId", {
+              ok: false,
+              error: "missing_run",
+            });
+            return ExitCode.INFRA_ERROR;
+          }
+          events = store.getEvents(runId);
         }
-        events = store.getEvents(runId);
       } finally {
         store.close();
       }
@@ -312,16 +317,24 @@ async function cmdImport(argv: string[], cwd: string): Promise<number> {
     emit(format, "Usage: agent-replay import <path>", { ok: false, error: "missing_path" });
     return ExitCode.INFRA_ERROR;
   }
-  const { store } = openStore(cwd, argv);
+  const { store, projectId } = openStore(cwd, argv);
   try {
     const data = readExport(path);
-    const result = importProject(store, data, { skipIntegrity: hasFlag(argv, "skip-integrity") });
+    const result = importProject(store, data, {
+      skipIntegrity: hasFlag(argv, "skip-integrity"),
+      // Remap into the local project so `list` / `test` / `replay` work without --project-id.
+      targetProjectId: projectId,
+    });
+    const remapNote =
+      data.projectId !== projectId
+        ? `\nRemapped export project "${data.projectId}" → local "${projectId}"`
+        : "";
     emit(
       format,
       result.ok
-        ? `Imported ${result.runsImported} run(s), ${result.fixturesImported} fixture(s)`
+        ? `Imported ${result.runsImported} run(s), ${result.fixturesImported} fixture(s)${remapNote}`
         : `Import issues:\n${result.errors.map((e) => `  - ${e}`).join("\n")}`,
-      { ...result },
+      { ...result, sourceProjectId: data.projectId, targetProjectId: projectId },
     );
     return result.ok ? ExitCode.PASS : ExitCode.INFRA_ERROR;
   } finally {
